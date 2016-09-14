@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        Log.d(TAG,"tag1");
+
         subscriberOnNextListener = new SubscriberOnNextListener<List<MovieEntity.SubjectsEntity>>() {
             @Override
             public void onNext(List<MovieEntity.SubjectsEntity> subjectsEntities) {
