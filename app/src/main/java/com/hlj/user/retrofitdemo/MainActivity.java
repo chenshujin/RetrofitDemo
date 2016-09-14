@@ -1,52 +1,33 @@
 package com.hlj.user.retrofitdemo;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hlj.user.retrofitdemo.bean.MovieEntity;
-import com.hlj.user.retrofitdemo.bean.OrderInfo;
-import com.hlj.user.retrofitdemo.interfaces.MovieService;
 import com.hlj.user.retrofitdemo.interfaces.SubscriberOnNextListener;
 import com.hlj.user.retrofitdemo.publics.HttpMethods;
 import com.hlj.user.retrofitdemo.publics.HttpResult;
-import com.hlj.user.retrofitdemo.publics.ProgressSubscriber;
-import com.jakewharton.rxbinding.view.RxView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String TAG = "MainActivity";
     @Bind(R.id.result_TV)
     TextView resultTV;
     @Bind(R.id.click_me_BN)
     Button button;
 //StringConverter
-//    private Subscriber<HttpResult<List<MovieEntity.SubjectsEntity>>> subscriber;
-    private Subscriber<List<MovieEntity.SubjectsEntity>> subscriber;
+    private Subscriber<HttpResult<List<MovieEntity.SubjectsEntity>>> subscriber;
+//    private Subscriber<List<MovieEntity.SubjectsEntity>> subscriber;
     private SubscriberOnNextListener<List<MovieEntity.SubjectsEntity>> subscriberOnNextListener;
 
     @Override
@@ -68,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });*/
-        List<OrderInfo> orderInfos=new ArrayList<>();
+
+        /*List<OrderInfo> orderInfos=new ArrayList<>();
         Observable.from(orderInfos).flatMap(new Func1<OrderInfo,Observable<OrderInfo.ChannelsEntity>>() {
             @Override
             public Observable<OrderInfo.ChannelsEntity> call(OrderInfo orderInfo) {
@@ -89,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             public void onNext(OrderInfo.ChannelsEntity channelsEntity) {
 
             }
-        });
+        });*/
 
 //        RxView.clickE(button);
 
@@ -101,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.click_me_BN)
     public void onClick() {
         getMovie();
-
     }
 
     //进行网络请求
@@ -173,23 +154,24 @@ public class MainActivity extends AppCompatActivity {
 //        HttpMethods.getInstance().getTopMovie(subscriber, 0, 10);
 
         //--------------------------------相同格式的Http请求如何封装-----------------------------------------
-//        subscriber = new Subscriber<HttpResult<List<MovieEntity.SubjectsEntity>>>() {
-//            @Override
-//            public void onCompleted() {
-//                Toast.makeText(MainActivity.this, "Get Top Movie Completed", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onError(Throwable e) {
-//
-//            }
-//
-//            @Override
-//            public void onNext(HttpResult<List<MovieEntity.SubjectsEntity>> listHttpResult) {
-//                resultTV.setText(listHttpResult.getSubjects().toString());
-//            }
-//        };
-//        HttpMethods.getInstance().getTopMovie(subscriber, 0, 10);
+        subscriber = new Subscriber<HttpResult<List<MovieEntity.SubjectsEntity>>>() {
+            @Override
+            public void onCompleted() {
+                Toast.makeText(MainActivity.this, "Get Top Movie Completed", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG,"E:"+e.getMessage());
+            }
+
+            @Override
+            public void onNext(HttpResult<List<MovieEntity.SubjectsEntity>> listHttpResult) {
+                Log.d(TAG,"onNext");
+                resultTV.setText(listHttpResult.getSubjects().toString());
+            }
+        };
+        HttpMethods.getInstance().getTopMovie(subscriber, 0, 10);
 
         //-------------------------------相同格式的使用map进行Http请求数据统一进行预处理-----------------------------------------
 //        subscriber = new Subscriber<List<MovieEntity.SubjectsEntity>>() {
@@ -200,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 //
 //            @Override
 //            public void onError(Throwable e) {
-//
+//                Log.d(TAG,"CUOWU"+e.getMessage());
 //            }
 //
 //            @Override
@@ -218,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        HttpMethods.getInstance().getTopMovie(subscriber, 0, 10);
 
-        HttpMethods.getInstance().getTopMovie(new ProgressSubscriber(subscriberOnNextListener,MainActivity.this),0,10);
+//        HttpMethods.getInstance().getTopMovie(new ProgressSubscriber(subscriberOnNextListener,MainActivity.this),0,10);
         //当cancel掉ProgressDialog的时候能够取消订阅也就取消当前Http请求
     }
 

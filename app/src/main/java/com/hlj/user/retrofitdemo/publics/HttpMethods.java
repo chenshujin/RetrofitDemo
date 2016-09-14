@@ -2,13 +2,13 @@ package com.hlj.user.retrofitdemo.publics;
 
 import android.util.Log;
 
+import com.hlj.user.retrofitdemo.ProductInfo;
 import com.hlj.user.retrofitdemo.bean.MovieEntity;
-import com.hlj.user.retrofitdemo.bean.OrderInfo;
 import com.hlj.user.retrofitdemo.interfaces.MovieService;
+import com.hlj.user.retrofitdemo.interfaces.ProductInfoService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -28,10 +28,11 @@ import rx.schedulers.Schedulers;
  * Created by ${csj} on 16/6/7.
  */
 public class HttpMethods {
-    public static final String BASE_URL = "https://api.douban.com/v2/movie/";
+    public static final String BASE_URL = "http://test.dev.honglingjinclub.com/";
 
     private static final int DEFAULT_TIMEOUT = 5;
     public static final String TAG = "HttpMethods";
+    private final ProductInfoService productInfoService;
 
     private Retrofit retrofit;
     private MovieService movieService;
@@ -41,6 +42,7 @@ public class HttpMethods {
         //手动创建一个OkHttpClient并设置超时时间
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
         httpClientBuilder.connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+
         httpClientBuilder.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -73,7 +75,8 @@ public class HttpMethods {
                 .baseUrl(BASE_URL)
                 .build();
 
-        movieService = retrofit.create(MovieService.class);
+//        movieService = retrofit.create(MovieService.class);
+        productInfoService = retrofit.create(ProductInfoService.class);
     }
 
     //在访问HttpMethods时创建单例
@@ -86,28 +89,39 @@ public class HttpMethods {
         return SingletonHolder.INSTANCE;
     }
 
+    public void getProductInfo(Subscriber<MyHttpResult<ProductInfo.BodyEntity>> subscriber,int productid,int communityid){
+        productInfoService.getProductInfo(productid,communityid)
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
+    }
+
     /**
      * 用于获取豆瓣电影Top250的数据
      * @param subscriber 由调用者传过来的观察者对象
      * @param start 起始位置
      * @param count 获取长度
      */
-    public void getTopMovie(Subscriber<List<MovieEntity.SubjectsEntity>> subscriber, int start, int count){
-        /*movieService.getTopMovie(start, count)
+    public void getTopMovie(Subscriber<HttpResult<List<MovieEntity.SubjectsEntity>>> subscriber, int start, int count){
+        //观察结果是HttpResult<List<List<MovieEntity.SubjectsEntity>>
+        movieService.getTopMovie(start, count)
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(subscriber);*/
-        /*movieService.getTopMovie(start, count)
+                .subscribe(subscriber);
+
+
+       /* movieService.getTopMovie(start, count)
                 .map(new HttpResultFunc<List<MovieEntity.SubjectsEntity>>())
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);*/
 
-        Observable observable=movieService.getTopMovie(start,count)
+        /*Observable observable=movieService.getTopMovie(start,count)
                 .map(new HttpResultFunc<List<MovieEntity.SubjectsEntity>>());
-        toSubscribe(observable,subscriber);
+        toSubscribe(observable,subscriber);*/
     }
 
 //    public void getOrderInfo(Subscriber<OrderInfo> subscriber,int communityId,)
